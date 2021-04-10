@@ -1,6 +1,7 @@
 import { GetStaticProps } from 'next';
 import Prismic from '@prismicio/client';
-
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -9,6 +10,7 @@ import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { getPrismicClient } from '../services/prismic';
 
 import styles from './home.module.scss';
+import Header from '../components/Header';
 
 interface Post {
   uid?: string;
@@ -67,25 +69,23 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
       </Head>
 
       <main className={styles.container}>
-        <header className={styles.header}>
-          <img src="/Logo.svg" alt="logo" />
-        </header>
+        <Header />
 
         <div className={styles.posts}>
           {posts.map(post => (
-            <Link href={`/posts/${post.uid}`} key={post.uid}>
+            <Link href={`/post/${post.uid}`} key={post.uid}>
               <a>
                 <h4>{post.data.title}</h4>
                 <p>{post.data.subtitle}</p>
                 <footer className={styles.footer}>
                   <div>
-                    <img src=" /user.svg" alt="calendar" />
-                    <p> {post.data.author}</p>
+                    <img src="/calendar.svg" alt="author" />
+                    <p> {post.first_publication_date}</p>
                   </div>
 
                   <div>
-                    <img src="/calendar.svg" alt="author" />
-                    <p> {post.first_publication_date}</p>
+                    <img src=" /user.svg" alt="calendar" />
+                    <p> {post.data.author}</p>
                   </div>
                 </footer>
               </a>
@@ -122,13 +122,13 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       subtitle: RichText.asText(post.data.subtitle),
       title: RichText.asText(post.data.title),
     },
-    first_publication_date: new Date(
-      post.first_publication_date
-    ).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }),
+    first_publication_date: format(
+      new Date(post.first_publication_date),
+      'dd MMM yyyy',
+      {
+        locale: ptBR,
+      }
+    ),
   }));
 
   return {
